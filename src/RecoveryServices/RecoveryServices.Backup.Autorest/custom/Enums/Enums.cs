@@ -48,6 +48,12 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Support
         Hourly
     }
 
+    public enum PolicySubTypes
+    {
+        Standard = 0,
+        Enhanced
+    }
+
     public enum RetentionRuleName
     {
         Default = 0,

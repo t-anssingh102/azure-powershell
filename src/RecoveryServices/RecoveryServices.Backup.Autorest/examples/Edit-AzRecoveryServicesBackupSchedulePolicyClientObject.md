@@ -144,7 +144,7 @@ This creates differential and incremental backup schedules respectively for SAPH
 ### Example 6: Editing SAPHANA backup schedule policy Log Backup
 ```powershell
 $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
-$editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -EnableLogBackup 1 -LogBackupFrequency 120
+$editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -EnableLogBackup 1 -LogBackupFrequencyInMin 120
 $LogBackupPolicy = $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Log" }
 $LogBackupPolicy.SchedulePolicy | fl
 ```

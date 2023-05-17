@@ -31,7 +31,7 @@ function ValidateBackupScheduleOptions {
 
 		[Parameter(Mandatory)]
 		[ref]
-		${LogBackupFrequency},
+		${LogBackupFrequencyInMin},
 
 		[Parameter(Mandatory)]
 		[ref]
@@ -82,7 +82,7 @@ function ValidateBackupScheduleOptions {
 		Write-Debug -Message "HourlyInterval: $HourlyInterval.Value"
 		Write-Debug -Message "HourlyScheduleWindowDuration: $HourlyScheduleWindowDuration.Value"
 		Write-Debug -Message "EnableLogBackup: $EnableLogBackup.Value"
-		Write-Debug -Message "LogBackupFrequency: $LogBackupFrequency.Value"
+		Write-Debug -Message "LogBackupFrequencyInMin: $LogBackupFrequencyInMin.Value"
 		Write-Debug -Message "EnableDifferentialBackup: $EnableDifferentialBackup.Value"
 		Write-Debug -Message "DifferentialRunDay: $DifferentialRunDay.Value"
 		Write-Debug -Message "DifferentialScheduleTime: $DifferentialScheduleTime.Value"
@@ -137,8 +137,9 @@ function ValidateBackupScheduleOptions {
 			$errormsg = "Specified BackupFrequency " + $BackupFrequency.Value + " is not supported for DatasourceType " + $DatasourceType + "`nAllowed values are: " + $allowedValues
 			throw $errormsg
 		}
-				
-		# Validate ScheduleTime		
+		
+		# Validate ScheduleTime
+		
 		if(-not $ScheduleTime.Value) {
 			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 2) {
 				# SAPHANA case
@@ -164,14 +165,14 @@ function ValidateBackupScheduleOptions {
 				}
 			}
 		}
-				
+		
 		# Validate ScheduleRunDay
 		
 		if( (-not $ScheduleRunDay.Value) -and ($BackupFrequency.Value -eq "Weekly") ) {
 			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 2) {
 				# SAPHANA case
 				if(-not $FullBackupPolicy.SchedulePolicy.ScheduleRunDays) {
-					$errormsg = "ScheduleRunDay cannot be empty for FullBackup"
+					$errormsg = "ScheduleRunDay cannot be empty for Weekly FullBackup"
 					throw $errormsg
 				}
 				else {
@@ -181,7 +182,7 @@ function ValidateBackupScheduleOptions {
 			else {
 				# AzureVM case
 				if(-not $Policy.SchedulePolicy.ScheduleRunDay) {
-					$errormsg = "ScheduleRunDay cannot be empty for FullBackup"
+					$errormsg = "ScheduleRunDay cannot be empty for Weekly FullBackup"
 					throw $errormsg
 				}
 				else {
@@ -189,21 +190,20 @@ function ValidateBackupScheduleOptions {
 				}
 			}
 		}
-				
+		
 		# Validate PolicySubType
-				
+		
 		if($PolicySubType.Value -eq "Enhanced") {
 			if(-not $manifest.supportsEnhanced) {
 				$errormsg = "Enhanced backup policies are not supported by " + $DatasourceType
 				throw $errormsg
 			}
 		}
-				
+		
 		# Validate Hourly specific parameters
 		
 		if ($HourlyInterval.Value -or $HourlyScheduleWindowDuration.Value) {
 			Write-Debug "Checking Hourly"
-			Write-Debug "Checkin"
 			Write-Debug -Message "BackupFrequency is $BackupFrequency.Value and PolicySubType is $PolicySubType.Value"
 			if (-not ( ($BackupFrequency.Value -eq "Hourly") -and ($PolicySubType.Value -eq "Enhanced") )) {
 				$errormsg = "Hourly parameters can only be set for Enhanced Hourly backups"
@@ -229,6 +229,12 @@ function ValidateBackupScheduleOptions {
 					$HourlyScheduleWindowDuration.Value = $policyObject.SchedulePolicy.HourlySchedule.ScheduleWindowDuration
 				}
 			}
+
+			if($HourlyScheduleWindowDuration.Value % $HourlyInterval.Value -ne 0) {
+				$errormsg = "HourlyScheduleWindowDuration must be greater than and a multiple of HourlyInterval"
+				throw $errormsg
+			}
+
 		}
 		
 		
@@ -240,12 +246,12 @@ function ValidateBackupScheduleOptions {
 				throw $errormsg
 			}
 		
-			if (-not $LogBackupFrequency.Value) {
-				if($LogBackupPolicy.LogBackupFrequency) {
-					$LogBackupFrequency.Value = $LogBackupPolicy.LogBackupFrequency
+			if (-not $LogBackupFrequencyInMin.Value) {
+				if($LogBackupPolicy.SchedulePolicy.ScheduleFrequencyInMin) {
+					$LogBackupFrequencyInMin.Value = $LogBackupPolicy.SchedulePolicy.ScheduleFrequencyInMin
 				}
 				else {
-					$errormsg = "LogBackupFrequency cannot be empty for LogBackup"
+					$errormsg = "LogBackupFrequencyInMin cannot be empty for LogBackup"
 					throw $errormsg	
 				}
 			}
@@ -253,9 +259,14 @@ function ValidateBackupScheduleOptions {
 		
 		# Validate Differential parameters	
 		
-		if ($EnableDifferentialBackup.Value -or ($DifferentialRunDay.Value) -or ($DifferentialScheduleTime.Value)) {	
-			if(-not ( $manifest.allowedSubProtectionPolicyTypes.Contains("Differential") ) -and ( ($FullBackupPolicy.SchedulePolicy.ScheduleRunFrequency -eq "Weekly") -or ($BackupFrequency.Value -eq "Weekly") ) ) {
-				$errormsg = "Differential backups are not supported for " + $BackupFrequency.Value + " " + $DatasourceType.Value + " backups"
+		if ($EnableDifferentialBackup.Value -or ($DifferentialRunDay.Value) -or ($DifferentialScheduleTime.Value)) {
+			if(-not $EnableDifferentialBackup.Value) {
+				$errormsg = "Differential backup parameters cannot be set when EnableDifferentialBackup is not set to True, please pass EnableDifferentialBackup as True to enable it."
+				throw $errormsg
+			}
+
+			if( ( -not $manifest.allowedSubProtectionPolicyTypes.Contains("Differential") ) -or ( ($BackupFrequency.Value -ne "Weekly") ) ) {
+				$errormsg = "Differential backups are not supported for " + $BackupFrequency.Value + " " + $DatasourceType + " backups"
 				throw $errormsg
 			}
 		
@@ -275,6 +286,13 @@ function ValidateBackupScheduleOptions {
 					$DifferentialRunDay.Value = $DifferentialPolicy.SchedulePolicy.ScheduleRunDays
 				}
 			}
+
+			$commonDays = Compare-Object -ReferenceObject $ScheduleRunDay.Value -DifferenceObject $DifferentialRunDay.Value -IncludeEqual -ExcludeDifferent
+
+			if ($commonDays.Count -gt 0) {
+				$errormsg = "Differential backups cannot be scheduled on same days as Full backups."
+				throw $errormsg	
+			}
 		
 			if (-not $DifferentialScheduleTime.Value) {
 				if (-not $DifferentialPolicy.SchedulePolicy.ScheduleRunTime) {
@@ -290,8 +308,14 @@ function ValidateBackupScheduleOptions {
 		# Validate Incremental parameters
 		
 		if ($EnableIncrementalBackup.Value -or ($IncrementalRunDay.Value) -or ($IncrementalScheduleTime.Value)) {
-			if(-not ( $manifest.allowedSubProtectionPolicyTypes.Contains("Incremental") ) -and ( ($FullBackupPolicy.SchedulePolicy.ScheduleRunFrequency -eq "Weekly") -or ($BackupFrequency.Value -eq "Weekly") ) ) {
-				$errormsg = "Incremental backups are not supported for " + $BackupFrequency.Value + " " + $DatasourceType.Value + " backups"
+
+			if (-not $EnableIncrementalBackup.Value) {
+				$errormsg = "Incremental backup parameters cannot be set when EnableIncrementalBackup is not set to True, please pass EnableIncrementalBackup as True to enable it."
+				throw $errormsg
+			}
+
+			if( ( -not $manifest.allowedSubProtectionPolicyTypes.Contains("Incremental") ) -or ( ($BackupFrequency.Value -ne "Weekly") ) ) {
+				$errormsg = "Incremental backups are not supported for " + $BackupFrequency.Value + " " + $DatasourceType + " backups"
 				throw $errormsg
 			}
 		
@@ -311,6 +335,14 @@ function ValidateBackupScheduleOptions {
 					$IncrementalRunDay.Value = $IncrementalPolicy.SchedulePolicy.ScheduleRunDays
 				}
 			}
+
+			$commonDays = Compare-Object -ReferenceObject $ScheduleRunDay.Value -DifferenceObject $IncrementalRunDay.Value -IncludeEqual -ExcludeDifferent
+
+			if ($commonDays.Count -gt 0) {
+				$errormsg = "Incremental backups cannot be scheduled on same days as Full backups."
+				throw $errormsg	
+			}
+
 			if (-not $IncrementalScheduleTime.Value) {
 				if (-not $IncrementalPolicy.SchedulePolicy.ScheduleRunTime) {
 					$errormsg = "IncrementalScheduleTime cannot be empty for Incremental backups"
@@ -331,7 +363,7 @@ function ValidateBackupScheduleOptions {
 		Write-Debug -Message "HourlyInterval: $HourlyInterval.Value"
 		Write-Debug -Message "HourlyScheduleWindowDuration: $HourlyScheduleWindowDuration.Value"
 		Write-Debug -Message "EnableLogBackup: $EnableLogBackup.Value"
-		Write-Debug -Message "LogBackupFrequency: $LogBackupFrequency.Value"
+		Write-Debug -Message "LogBackupFrequencyInMin: $LogBackupFrequencyInMin.Value"
 		Write-Debug -Message "EnableDifferentialBackup: $EnableDifferentialBackup.Value"
 		Write-Debug -Message "DifferentialRunDay: $DifferentialRunDay.Value"
 		Write-Debug -Message "DifferentialScheduleTime: $DifferentialScheduleTime.Value"

@@ -13,7 +13,7 @@
 
         [Parameter(ParameterSetName='ModifySchedulePolicy', HelpMessage='Specifies the policy sub type for AzureVM.')]
         [ValidateSet("Standard", "Enhanced", ErrorMessage = "Invalid value for PolicySubType. Please provide a valid policy sub type. Valid values are 'Standard' and 'Enhanced'.")]
-        [string]
+        [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Support.PolicySubTypes]
         ${PolicySubType} = "Standard",
 
         [Parameter(ParameterSetName='ModifySchedulePolicy', HelpMessage='Specifies the interval between backups in hours.')]
@@ -36,10 +36,10 @@
         ${EnableLogBackup},
 
         [Parameter(ParameterSetName='ModifySchedulePolicy', HelpMessage='Specifies the frequency of log backups in minutes')]
-        [ValidateSet(15, 30, 60, 120, 240, 480, 720, 1440, ErrorMessage = "Invalid value for LogBackupFrequency. Please provide a valid frequency. Valid values are 15, 30, 60, 120, 240, 480, 720, and 1440.")]
+        [ValidateSet(15, 30, 60, 120, 240, 480, 720, 1440, ErrorMessage = "Invalid value for LogBackupFrequencyInMin. Please provide a valid frequency. Valid values are 15, 30, 60, 120, 240, 480, 720, and 1440.")]
         [AllowNull()]
         [System.Nullable[int]]
-        ${LogBackupFrequency} = $null,
+        ${LogBackupFrequencyInMin} = $null,
 
         [Parameter(ParameterSetName='ModifySchedulePolicy', HelpMessage='Specifies whether the user wants to enable differential backup.')]
         [AllowNull()]
@@ -138,7 +138,7 @@
         
         Write-Debug -Message "BackupFrequency before : $BackupFrequency"
 
-        ValidateBackupScheduleOptions -Policy $Policy -DatasourceType $DatasourceType -PolicySubType ([ref]$PolicySubType) -HourlyInterval ([ref]$HourlyInterval) -HourlyScheduleWindowDuration ([ref]$HourlyScheduleWindowDuration) -BackupFrequency ([ref]$BackupFrequency) -ScheduleRunDay ([ref]$ScheduleRunDay) -ScheduleTime ([ref]$ScheduleTime) -EnableIncrementalBackup ([ref]$EnableIncrementalBackup) -IncrementalRunDay ([ref]$IncrementalRunDay) -IncrementalScheduleTime ([ref]$IncrementalScheduleTime) -EnableDifferentialBackup ([ref]$EnableDifferentialBackup) -DifferentialRunDay ([ref]$DifferentialRunDay) -DifferentialScheduleTime ([ref]$DifferentialScheduleTime) -EnableLogBackup ([ref]$EnableLogBackup) -LogBackupFrequency ([ref]$LogBackupFrequency)
+        ValidateBackupScheduleOptions -Policy $Policy -DatasourceType $DatasourceType -PolicySubType ([ref]$PolicySubType) -HourlyInterval ([ref]$HourlyInterval) -HourlyScheduleWindowDuration ([ref]$HourlyScheduleWindowDuration) -BackupFrequency ([ref]$BackupFrequency) -ScheduleRunDay ([ref]$ScheduleRunDay) -ScheduleTime ([ref]$ScheduleTime) -EnableIncrementalBackup ([ref]$EnableIncrementalBackup) -IncrementalRunDay ([ref]$IncrementalRunDay) -IncrementalScheduleTime ([ref]$IncrementalScheduleTime) -EnableDifferentialBackup ([ref]$EnableDifferentialBackup) -DifferentialRunDay ([ref]$DifferentialRunDay) -DifferentialScheduleTime ([ref]$DifferentialScheduleTime) -EnableLogBackup ([ref]$EnableLogBackup) -LogBackupFrequencyInMin ([ref]$LogBackupFrequencyInMin)
 
         Write-Debug -Message "BackupFrequency after : $BackupFrequency"
 
@@ -208,11 +208,6 @@
                     
                     $policyObject.Setting.TimeZone = $TimeZone
 
-                    # Default values for testing
-                    #$FullBackupPolicy.RetentionPolicy.DailySchedule = $null
-                    #$FullBackupPolicy.RetentionPolicy.MonthlySchedule.RetentionScheduleWeekly.DaysOfTheWeek[0] = $ScheduleRunDay[0]
-                    #$FullBackupPolicy.RetentionPolicy.YearlySchedule.RetentionScheduleWeekly.DaysOfTheWeek[0] = $ScheduleRunDay[0]
-
                     $policyObject.SubProtectionPolicy[$Index] = $FullBackupPolicy
                 }
             }
@@ -221,12 +216,12 @@
                 $LogBackupPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Log" }
                 $Index = $policyObject.SubProtectionPolicy.IndexOf($LogBackupPolicy)
 
-                $LogBackupPolicy.SchedulePolicy.ScheduleFrequencyInMin = $LogBackupFrequency
+                $LogBackupPolicy.SchedulePolicy.ScheduleFrequencyInMin = $LogBackupFrequencyInMin
                 
                 $policyObject.SubProtectionPolicy[$Index] = $LogBackupPolicy
             }
 
-            if($EnableDifferentialBackup) {
+            if ($EnableDifferentialBackup) {
 
                 $givenTime = [DateTime]::ParseExact($DifferentialScheduleTime, "h:mm tt", $null)
         
@@ -236,7 +231,7 @@
                 )
 
                 $DifferentialPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Differential" }
-                
+
                 # Add a new sub protection policy for differential backup if it doesn't exist already
                 if (-not $DifferentialPolicy) {
 					$policyObject.SubProtectionPolicy += [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.SubProtectionPolicy]::new()
@@ -253,16 +248,18 @@
                 $DifferentialPolicy.SchedulePolicy.Type = "SimpleSchedulePolicy"
                 $DifferentialPolicy.SchedulePolicy.ScheduleWeeklyFrequency = 0
 
-                # Default values for testing
-                #$DifferentialPolicy.RetentionPolicy = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.SimpleRetentionPolicy]::new()
-                #$DifferentialPolicy.RetentionPolicy.Type = "SimpleRetentionPolicy"
-                #$DifferentialPolicy.RetentionPolicy.RetentionDurationCount = 30
-                #$DifferentialPolicy.RetentionPolicy.RetentionDurationType = "Days"
-
                 $policyObject.SubProtectionPolicy[$Index] = $DifferentialPolicy
             }
+            elseif ($EnableDifferentialBackup -eq $false) {
+				$DifferentialPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Differential" }
+				
+                if ($DifferentialPolicy) {
+					$Index = $policyObject.SubProtectionPolicy.IndexOf($DifferentialPolicy)
+					$policyObject.SubProtectionPolicy.RemoveAt($Index)
+				}
+            }
 
-            if($EnableIncrementalBackup) {
+            if ($EnableIncrementalBackup) {
 
                 $givenTime = [DateTime]::ParseExact($IncrementalScheduleTime, "h:mm tt", $null)
         
@@ -289,14 +286,17 @@
                 $IncrementalPolicy.SchedulePolicy.Type = "SimpleSchedulePolicy"
                 $IncrementalPolicy.SchedulePolicy.ScheduleWeeklyFrequency = 0
 
-                # Default values for testing
-                #$IncrementalPolicy.RetentionPolicy = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.SimpleRetentionPolicy]::new()
-                #$IncrementalPolicy.RetentionPolicy.Type = "SimpleRetentionPolicy"
-                #$IncrementalPolicy.RetentionPolicy.RetentionDurationCount = 30
-                #$IncrementalPolicy.RetentionPolicy.RetentionDurationType = "Days"
-
                 $policyObject.SubProtectionPolicy[$Index] = $IncrementalPolicy
             }
+            elseif ($EnableIncrementalPolicy -eq $false) {
+                $IncrementalPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Incremental" }
+
+                if ($IncrementalPolicy) {
+	                $Index = $policyObject.SubProtectionPolicy.IndexOf($IncrementalPolicy)
+                    $policyObject.SubProtectionPolicy.RemoveAt($Index)
+                }
+            }
+          
         }
         else {
 
@@ -332,11 +332,6 @@
                     $policyObject.SchedulePolicy.ScheduleRunFrequency = "Daily"
 
 					$policyObject.TimeZone = $TimeZone
-
-                    # Default values for testing
-                    #$policyObject.RetentionPolicy.WeeklySchedule = $null
-                    #$policyObject.RetentionPolicy.MonthlySchedule = $null
-                    #$policyObject.RetentionPolicy.YearlySchedule = $null
                 }
 
                 "Weekly" {
@@ -362,11 +357,6 @@
                     $policyObject.TimeZone = $TimeZone
 
                     $policyObject.InstantRpRetentionRangeInDay = 5
-
-                    # Default values for testing
-                    #$policyObject.RetentionPolicy.DailySchedule = $null
-                    #$policyObject.RetentionPolicy.MonthlySchedule = $null
-                    #$policyObject.RetentionPolicy.YearlySchedule = $null
                 }
 
                 "Hourly" {
@@ -389,12 +379,6 @@
                     
                     $policyJson = $policyObject | ConvertTo-Json -Depth 10
                     Write-Debug $policyJson
-
-                    # Default values for testing
-                    #$policyObject.InstantRpRetentionRangeInDay = 7
-                    #$policyObject.RetentionPolicy.WeeklySchedule = $null
-                    #$policyObject.RetentionPolicy.MonthlySchedule = $null
-					#$policyObject.RetentionPolicy.YearlySchedule = $null
                 }
             }   
         }

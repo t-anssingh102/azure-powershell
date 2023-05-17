@@ -17,7 +17,7 @@ Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy <IProtectionPoli
  [-BackupFrequency <String>] [-DifferentialRunDay <String[]>] [-DifferentialScheduleTime <String>]
  [-EnableDifferentialBackup <Boolean?>] [-EnableIncrementalBackup <Boolean?>] [-EnableLogBackup <Boolean?>]
  [-HourlyInterval <Int32?>] [-HourlyScheduleWindowDuration <Int32?>] [-IncrementalRunDay <String[]>]
- [-IncrementalScheduleTime <String>] [-LogBackupFrequency <Int32?>] [-PolicySubType <String>]
+ [-IncrementalScheduleTime <String>] [-LogBackupFrequencyInMin <Int32?>] [-PolicySubType <PolicySubTypes>]
  [-ScheduleRunDay <String[]>] [-ScheduleTime <String>] [-TimeZone <String>] [<CommonParameters>]
 ```
 
@@ -172,7 +172,7 @@ This creates differential and incremental backup schedules respectively for SAPH
 ### Example 6: Editing SAPHANA backup schedule policy Log Backup
 ```powershell
 $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
-$editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -EnableLogBackup 1 -LogBackupFrequency 120
+$editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -EnableLogBackup 1 -LogBackupFrequencyInMin 120
 $LogBackupPolicy = $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Log" }
 $LogBackupPolicy.SchedulePolicy | fl
 ```
@@ -336,7 +336,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -LogBackupFrequency
+### -LogBackupFrequencyInMin
 Specifies the frequency of log backups in minutes
 
 ```yaml
@@ -371,7 +371,7 @@ Accept wildcard characters: False
 Specifies the policy sub type for AzureVM.
 
 ```yaml
-Type: System.String
+Type: Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Support.PolicySubTypes
 Parameter Sets: (All)
 Aliases:
 

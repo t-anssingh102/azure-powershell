@@ -1,0 +1,27 @@
+{
+    "requests": [
+        {
+            "content": {
+                "properties": {
+                    "objectType": "AzureWorkloadSAPHanaPointInTimeRestoreRequest",
+                    "targetInfo": {
+                        "containerId": "/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-eus-pstest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-eus-pstest-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;saphana-eus-pstest-rg;saphana-eus-pstest-vm",
+                        "databaseName": "ARV/arv11",
+                        "overwriteOption": "FailOnConflict"
+                    },
+                    "recoveryType": "AlternateLocation",
+                    "sourceResourceId": "/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-eus-pstest-rg/providers/Microsoft.Compute/virtualMachines/saphana-eus-pstest-vm",
+                    "targetVirtualMachineId": "/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-eus-pstest-rg/providers/Microsoft.Compute/virtualMachines/saphana-eus-pstest-vm",
+                    "pointInTime": "2023-06-25T03:50:05.500Z"
+                }
+            },
+            "httpMethod": "POST",
+            "name": "ba2378dc-9ad3-4ea6-ae01-1a7d8bb2601d",
+            "requestHeaderDetails": {
+                "commandName": "Microsoft_Azure_DataProtection.TriggerAzureWorkloadRestore"
+            },
+            "requestHeaderDictionary": {},
+            "url": "https://management.azure.com/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-eus-pstest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-eus-pstest-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-eus-pstest-rg;saphana-eus-pstest-vm/protectedItems/SAPHanaDatabase;arv;arv/recoveryPoints/DefaultRangeRecoveryPoint/restore?api-version=2021-07-01"
+        }
+    ]
+}

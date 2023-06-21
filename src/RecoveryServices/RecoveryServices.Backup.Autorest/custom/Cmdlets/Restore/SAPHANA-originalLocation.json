@@ -1,0 +1,19 @@
+{
+    "requests": [
+        {
+            "content": {
+                "properties": {
+                    "objectType": "AzureWorkloadSAPHanaRestoreRequest",
+                    "recoveryType": "OriginalLocation"
+                }
+            },
+            "httpMethod": "POST",
+            "name": "00232711-c50d-4253-8e43-7fe01fe0d01c",
+            "requestHeaderDetails": {
+                "commandName": "Microsoft_Azure_DataProtection.TriggerAzureWorkloadRestore"
+            },
+            "requestHeaderDictionary": {},
+            "url": "https://management.azure.com/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-eus-pstest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-eus-pstest-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-eus-pstest-rg;saphana-eus-pstest-vm/protectedItems/SAPHanaDatabase;arv;arv/recoveryPoints/30820155647806/restore?api-version=2021-07-01"
+        }
+    ]
+}

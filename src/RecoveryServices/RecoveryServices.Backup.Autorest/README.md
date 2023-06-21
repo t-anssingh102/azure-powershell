@@ -70,6 +70,16 @@ directive:
       subject: ProtectionPolicy
     set:
       subject: BackupPolicy
+  - where:      
+      subject: Job|BackupEngine|OperationResult|OperationStatuses|ProtectableItem|Item|ProtectionContainer|ProtectionIntent|EncryptionConfig|StorageConfigsNonCrr|VaultConfig|BackupStatus|BackupUsageSummary|JobDetail|OperationStatus|PrivateEndpointConnection|RecoveryPoint|RecommendedForMove|ResourceGuardProxy|SecurityPiN|ItemLevelRecoveryConnection|Restore|Cancellation|ValidateOperation|ResourceGuardProxyDelete|ProtectableContainer|Prepare|FeatureSupport
+    remove: true
+  - where:      
+      verb: Start
+    remove: true
+  - where:      
+      verb: Set
+      subject: BackupPolicy
+    remove: true
   - no-inline:
     - DailyRetentionSchedule
     - HourlySchedule

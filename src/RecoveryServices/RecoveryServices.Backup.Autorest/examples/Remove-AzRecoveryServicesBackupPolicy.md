@@ -1,6 +1,22 @@
-### Example 1: Remove a policy with its name
+### Example 1: {{ Add title here }}
 ```powershell
- Remove-AzRecoveryServicesBackupPolicy -PolicyName "MyPolicy" -ResourceGroupName "MyResourceGroup" -VaultName "MyVault"
+{{ Add code here }}
 ```
 
-This command deletes the specified existing policy.
+```output
+{{ Add output here }}
+```
+
+{{ Add description here }}
+
+### Example 2: {{ Add title here }}
+```powershell
+{{ Add code here }}
+```
+
+```output
+{{ Add output here }}
+```
+
+{{ Add description here }}
+

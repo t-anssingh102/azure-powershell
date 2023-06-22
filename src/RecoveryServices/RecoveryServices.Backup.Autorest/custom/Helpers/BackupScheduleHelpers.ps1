@@ -137,11 +137,8 @@ function ValidateBackupScheduleOptions {
 			$errormsg = "Specified BackupFrequency " + $BackupFrequency.Value + " is not supported for DatasourceType " + $DatasourceType + "`nAllowed values are: " + $allowedValues
 			throw $errormsg
 		}
-		
-		Write-Debug "Here 0"
-		
-		# Validate ScheduleTime
-		
+				
+		# Validate ScheduleTime		
 		if(-not $ScheduleTime.Value) {
 			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 1) {
 				# SAPHANA case
@@ -167,9 +164,7 @@ function ValidateBackupScheduleOptions {
 				}
 			}
 		}
-		
-		Write-Debug "Here 1"
-		
+				
 		# Validate ScheduleRunDay
 		
 		if( (-not $ScheduleRunDay.Value) -and ($BackupFrequency.Value -eq "Weekly") ) {
@@ -194,22 +189,16 @@ function ValidateBackupScheduleOptions {
 				}
 			}
 		}
-		
-		Write-Debug -Message "Here 3"
-		
+				
 		# Validate PolicySubType
-		
-		Write-Debug -Message "Here 4"
-		
+				
 		if($PolicySubType.Value -eq "Enhanced") {
 			if(-not $manifest.supportsEnhanced) {
 				$errormsg = "Enhanced backup policies are not supported by " + $DatasourceType
 				throw $errormsg
 			}
 		}
-		
-		Write-Debug -Message "Here 5"
-		
+				
 		# Validate Hourly specific parameters
 		
 		if ($HourlyInterval.Value -or $HourlyScheduleWindowDuration.Value) {

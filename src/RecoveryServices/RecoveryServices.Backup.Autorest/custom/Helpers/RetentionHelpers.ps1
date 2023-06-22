@@ -175,7 +175,7 @@ function ValidateRetentionParameters {
        
         if($ModifyFullBackup)
         {
-            $FullBackupPolicy =  $Policy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+            $FullBackupPolicy =  $Policy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
             $Index = $Policy.SubProtectionPolicy.IndexOf($FullBackupPolicy)
         }
 
@@ -539,7 +539,7 @@ function ValidateMandatoryFields {
         $Index=1
         if($ModifyFullBackup)
         {
-            $FullBackupPolicy =  $Policy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+            $FullBackupPolicy =  $Policy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
             $Index = $Policy.SubProtectionPolicy.IndexOf($FullBackupPolicy)
         }
 

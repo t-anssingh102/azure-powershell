@@ -175,7 +175,7 @@
 
             Write-Debug "In SAPHANA"
 
-            $FullBackupPolicy =  $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+            $FullBackupPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
             $Index = $policyObject.SubProtectionPolicy.IndexOf($FullBackupPolicy)
                                        
             switch($BackupFrequency) { 
@@ -218,7 +218,7 @@
             }
 
             if($EnableLogBackup) {
-                $LogBackupPolicy =  $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Log" }
+                $LogBackupPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Log" }
                 $Index = $policyObject.SubProtectionPolicy.IndexOf($LogBackupPolicy)
 
                 $LogBackupPolicy.SchedulePolicy.ScheduleFrequencyInMin = $LogBackupFrequency
@@ -235,7 +235,7 @@
                     [System.DateTimeKind]::Utc
                 )
 
-                $DifferentialPolicy =  $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Differential" }
+                $DifferentialPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Differential" }
                 
                 # Add a new sub protection policy for differential backup if it doesn't exist already
                 if (-not $DifferentialPolicy) {
@@ -271,7 +271,7 @@
                     [System.DateTimeKind]::Utc
                 )
 
-                $IncrementalPolicy =  $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Incremental" }
+                $IncrementalPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Incremental" }
                 
                 # Add a new sub protection policy for incremental backup if it doesn't exist already
                 if (-not $IncrementalPolicy) {

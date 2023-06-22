@@ -123,7 +123,7 @@ Describe 'Edit-AzRecoveryServicesBackupSchedulePolicyClientObject' {
         $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
         $testPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -BackupFrequency "Daily" -ScheduleTime "1:30 PM" -TimeZone "Tokyo Standard Time"
         
-        $FullBackupPolicy =  $testPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+        $FullBackupPolicy =  $testPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
         $FullBackupPolicy.SchedulePolicy.ScheduleRunFrequency | Should be "Daily"
         $FullBackupPolicy.SchedulePolicy.ScheduleRunTime[0].ToString("HH:mm:ss") | Should be "13:30:00"
         $testPolicy.Setting.TimeZone | Should be "Tokyo Standard Time"
@@ -153,13 +153,13 @@ Describe 'Edit-AzRecoveryServicesBackupSchedulePolicyClientObject' {
         $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
         $testPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -BackupFrequency "Weekly" -ScheduleRunDay @("Monday", "Thursday") -EnableDifferentialBackup 1 -DifferentialRunDay @("Tuesday", "Friday") -DifferentialScheduleTime "2:00 AM" -ScheduleTime "1:30 PM" -TimeZone "Tokyo Standard Time"
         
-        $FullBackupPolicy =  $testPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+        $FullBackupPolicy =  $testPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
         $FullBackupPolicy.SchedulePolicy.ScheduleRunFrequency | Should be "Weekly"
         $FullBackupPolicy.SchedulePolicy.ScheduleRunDay | Should be @("Monday", "Thursday")
         $FullBackupPolicy.SchedulePolicy.ScheduleRunTime[0].ToString("HH:mm:ss") | Should be "13:30:00"
         $testPolicy.Setting.TimeZone | Should be "Tokyo Standard Time"
 
-        $DifferentialPolicy =  $testPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Differential" }
+        $DifferentialPolicy =  $testPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Differential" }
         $DifferentialPolicy.PolicyType | Should be "Differential"
         $DifferentialPolicy.SchedulePolicy.Type | Should be "SimpleSchedulePolicy"
         $DifferentialPolicy.SchedulePolicy.ScheduleRunFrequency | Should be "Weekly"
@@ -192,13 +192,13 @@ Describe 'Edit-AzRecoveryServicesBackupSchedulePolicyClientObject' {
         $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
         $testPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -BackupFrequency "Weekly" -ScheduleRunDay @("Monday", "Thursday") -EnableIncrementalBackup 1 -IncrementalRunDay @("Tuesday", "Friday") -IncrementalScheduleTime "2:00 AM" -ScheduleTime "1:30 PM" -TimeZone "Tokyo Standard Time"
         
-        $FullBackupPolicy =  $testPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+        $FullBackupPolicy =  $testPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
         $FullBackupPolicy.SchedulePolicy.ScheduleRunFrequency | Should be "Weekly"
         $FullBackupPolicy.SchedulePolicy.ScheduleRunDay | Should be @("Monday", "Thursday")
         $FullBackupPolicy.SchedulePolicy.ScheduleRunTime[0].ToString("HH:mm:ss") | Should be "13:30:00"
         $testPolicy.Setting.TimeZone | Should be "Tokyo Standard Time"
 
-        $IncrementalPolicy =  $testPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Incremental" }
+        $IncrementalPolicy =  $testPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Incremental" }
         $IncrementalPolicy.PolicyType | Should be "Incremental"
         $IncrementalPolicy.SchedulePolicy.Type | Should be "SimpleSchedulePolicy"
         $IncrementalPolicy.SchedulePolicy.ScheduleRunFrequency | Should be "Weekly"
@@ -231,7 +231,7 @@ Describe 'Edit-AzRecoveryServicesBackupSchedulePolicyClientObject' {
         $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
         $testPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -EnableLogBackup 1 -LogBackupFrequency 120        
 
-        $LogBackupPolicy =  $testPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Log" }
+        $LogBackupPolicy =  $testPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Log" }
         $LogBackupPolicy.PolicyType | Should be "Log"
         $LogBackupPolicy.SchedulePolicy.ScheduleFrequencyInMin | Should be 120
 

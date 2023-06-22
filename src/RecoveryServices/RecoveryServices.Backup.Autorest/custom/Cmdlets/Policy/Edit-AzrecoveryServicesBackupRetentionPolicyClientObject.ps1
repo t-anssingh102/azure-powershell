@@ -518,7 +518,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
           
           if($ModifyDifferentialBackup)
           {
-               $FullBackupPolicy =  $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+               $FullBackupPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
                $Index1 = $policyObject.SubProtectionPolicy.IndexOf($FullBackupPolicy)
 
                ## Mandatory Full backup conditions for testing
@@ -556,7 +556,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                {
                    $policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.DailySchedule=$null
                    $policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunFrequency="Weekly"
-                   $DifferentialPolicy = $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Differential" }
+                   $DifferentialPolicy = $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Differential" }
                    if (-not $DifferentialPolicy )
                    {
                        $errormsg= "Differential policy dosen't exist. Please use the Edit-AzRecoveryServicesBackupSchedulePolicyClientObject command to initiate Differential backup."
@@ -584,7 +584,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
           
           if($ModifyIncrementalBackup)
           {
-               $FullBackupPolicy =  $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+               $FullBackupPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
                $Index1 = $policyObject.SubProtectionPolicy.IndexOf($FullBackupPolicy)
                # Mandatory Full backup conditions for testing
                #$policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunFrequency="Weekly"
@@ -619,7 +619,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                {
                    $policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.DailySchedule=$null
                    $policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunFrequency="Weekly"
-                   $IncrementalPolicy =  $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Incremental" }
+                   $IncrementalPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Incremental" }
                    if (-not $IncrementalPolicy)
                    {
                        $errormsg= "Incremental policy dosen't exist. Please use the Edit-AzRecoveryServicesBackupSchedulePolicyClientObject command to initiate Incremental backup."
@@ -647,7 +647,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
           
           if($ModifyLogBackup)
           {
-               $LogBackupPolicy = $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Log" }
+               $LogBackupPolicy = $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Log" }
                $Index = $policyObject.SubProtectionPolicy.IndexOf($LogBackupPolicy)
                if ($policyObject.SubProtectionPolicy[$index] -ne $null )
                {
@@ -662,7 +662,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
         
           if($ModifyFullBackup)
           {
-              $FullBackupPolicy =  $policyObject.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+              $FullBackupPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
               $Index = $policyObject.SubProtectionPolicy.IndexOf($FullBackupPolicy)
               if($policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunFrequency -eq "Weekly")
               {

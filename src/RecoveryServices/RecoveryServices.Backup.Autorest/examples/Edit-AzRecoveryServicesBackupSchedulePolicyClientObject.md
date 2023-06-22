@@ -61,12 +61,12 @@ This creates an enhanced hourly full backup schedule for AzureVM
 ```powershell
 $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
 $editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -BackupFrequency "Daily" -ScheduleTime "1:30 PM" -TimeZone "Tokyo Standard Time"
-$FullBackupPolicy =  $editedPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+$FullBackupPolicy =  $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
 $FullBackupPolicy.SchedulePolicy | fl
 
 $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
 $editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -BackupFrequency "Weekly" -ScheduleRunDay @("Monday", "Thursday") -ScheduleTime "1:30 PM" -TimeZone "Tokyo Standard Time"
-$FullBackupPolicy =  $editedPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+$FullBackupPolicy =  $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
 $FullBackupPolicy.SchedulePolicy | fl
 ```
 
@@ -92,16 +92,16 @@ This creates daily and weekly full backup schedules respectively for SAPHANA
 ```powershell
 $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
 $editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -BackupFrequency "Weekly" -ScheduleRunDay @("Monday", "Thursday") -EnableDifferentialBackup 1 -DifferentialRunDay @("Tuesday", "Friday") -DifferentialScheduleTime "2:00 AM" -ScheduleTime "1:30 PM" -TimeZone "Tokyo Standard Time"
-$FullBackupPolicy =  $editedPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+$FullBackupPolicy =  $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
 $FullBackupPolicy.SchedulePolicy | fl
-$DifferentialPolicy = $editedPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Differential" }
+$DifferentialPolicy = $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Differential" }
 $DifferentialPolicy.SchedulePolicy | fl
 
 $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
 $editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -BackupFrequency "Weekly" -ScheduleRunDay @("Monday", "Thursday") -EnableIncrementalBackup 1 -IncrementalRunDay @("Tuesday", "Friday") -IncrementalScheduleTime "2:00 AM" -ScheduleTime "1:30 PM" -TimeZone "Tokyo Standard Time"
-$FullBackupPolicy =  $editedPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
+$FullBackupPolicy =  $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
 $FullBackupPolicy.SchedulePolicy | fl
-$IncrementalPolicy = $editedPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Incremental" }
+$IncrementalPolicy = $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Incremental" }
 $IncrementalPolicy.SchedulePolicy | fl
 ```
 
@@ -145,7 +145,7 @@ This creates differential and incremental backup schedules respectively for SAPH
 ```powershell
 $pol = Get-AzRecoveryServicesPolicyTemplate -DatasourceType SAPHANA
 $editedPolicy = Edit-AzRecoveryServicesBackupSchedulePolicyClientObject -Policy $pol -EnableLogBackup 1 -LogBackupFrequency 120
-$LogBackupPolicy = $editedPolicy.SubProtectionPolicy | where { $_.PolicyType -match "Log" }
+$LogBackupPolicy = $editedPolicy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Log" }
 $LogBackupPolicy.SchedulePolicy | fl
 ```
 

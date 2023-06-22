@@ -97,10 +97,10 @@ function ValidateBackupScheduleOptions {
 		
 		Write-Debug -Message "Manifest: $manifest" 
 		
-		$FullBackupPolicy = $Policy.SubProtectionPolicy | where { $_.PolicyType -match "Full" }
-		$LogBackupPolicy = $Policy.SubProtectionPolicy | where { $_.PolicyType -match "Log" }
-		$DifferentialPolicy = $Policy.SubProtectionPolicy | where { $_.PolicyType -match "Differential" }
-		$IncrementalPolicy = $Policy.SubProtectionPolicy | where { $_.PolicyType -match "Incremental" }
+		$FullBackupPolicy = $Policy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
+		$LogBackupPolicy = $Policy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Log" }
+		$DifferentialPolicy = $Policy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Differential" }
+		$IncrementalPolicy = $Policy.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Incremental" }
 		
 		# Validate BackupFrequency
 		

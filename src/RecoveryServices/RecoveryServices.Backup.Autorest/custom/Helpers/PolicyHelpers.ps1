@@ -163,7 +163,7 @@ function ValidateRetentionParameters {
         Write-Debug -Message $DatasourceType
         
         $manifest = LoadManifest -DatasourceType $DatasourceType.ToString()
-        if($manifest.allowedSubProtectionPolicyTypes.Count -gt 1)
+        if($manifest.allowedSubProtectionPolicyTypes.Count -gt 2)
         {
             if(-not($ModifyFullBackup -or $ModifyDifferentialBackup -or $ModifyIncrementalBackup -or $ModifyLogBackup) )
             {
@@ -547,7 +547,7 @@ function ValidateMandatoryFields {
 
         if ($EnableDailyRetention -eq $true) 
         {
-             if($manifest.allowedSubProtectionPolicyTypes.Count -gt 1)   #SAPHANA/MSSQL
+             if($manifest.allowedSubProtectionPolicyTypes.Count -gt 2)   #SAPHANA/MSSQL
 			 {
                   if(($Policy.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count -eq $null) -or ($Policy.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count -eq 0) ) 
                   {
@@ -571,7 +571,7 @@ function ValidateMandatoryFields {
 
         if ($EnableWeeklyRetention -eq $true) 
         {
-             if($manifest.allowedSubProtectionPolicyTypes.Count -gt 1)   #SAPHANA/MSSQL
+             if($manifest.allowedSubProtectionPolicyTypes.Count -gt 2)   #SAPHANA/MSSQL
 			 {
                   if(($Policy.SubProtectionPolicy[$Index].RetentionPolicy.WeeklySchedule.DaysOfTheWeek.Count -eq 0) -or ($Policy.SubProtectionPolicy[$Index].RetentionPolicy.WeeklySchedule.DaysOfTheWeek.Count -eq $null) )
                   {
@@ -606,7 +606,7 @@ function ValidateMandatoryFields {
         # Validate Monthly Retention Parameters
         if ($EnableMonthlyRetention -eq $true) 
         { 
-            if($manifest.allowedSubProtectionPolicyTypes.Count -gt 1)   #SAPHANA/MSSQL
+            if($manifest.allowedSubProtectionPolicyTypes.Count -gt 2)   #SAPHANA/MSSQL
 			{
                 if(($Policy.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq $null) -or ($Policy.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq 0)) 
                 {
@@ -694,7 +694,7 @@ function ValidateMandatoryFields {
 
         if ($EnableYearlyRetention -eq $true) 
         {
-            if($manifest.allowedSubProtectionPolicyTypes.Count -gt 1)   #SAPHANA/MSSQL
+            if($manifest.allowedSubProtectionPolicyTypes.Count -gt 2)   #SAPHANA/MSSQL
 			{
                 if(($Policy.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq $null) -or ($Policy.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq 0)) 
                 {
@@ -803,3 +803,107 @@ function ValidateMandatoryFields {
         }
     }
 }
+
+
+
+function ValidateTieringPolicy
+{
+    if($tieringdetails.TieringMode -eq "")
+    {
+        $errormsg="Please specify the tiering mode"
+        throw $errormsg
+    }
+    if( ($tieringdetails.TieringMode -eq "DoNotTier") -or ($tieringdetails.TieringMode -eq "TierRecommended"))
+    {
+        if(($tieringdetails.Duration -ne $null -or $tieringdetails.DurationType -ne $null) -and ($tieringdetails.Duration -gt 0 -and $tieringdetails.durationType -ne "Invalid"))
+        {
+            $errormsg="Invalid parameters TierAfterDuration, TierAfterDurationType for the given TieringMode"
+            throw $errormsg
+        }
+    }
+    elseif($tieringdetails.TieringMode -eq "TierAfter")
+    {
+        if( ($tieringdetails.Duration -eq $null) -or ($tieringdetails.Duration -eq 0) -or ($tieringdetails.DurationType -eq "") -or ($tieringdetails.DurationType -eq $null) )
+        {
+            $errormsg="Missing parameter values for TierAfter Mode"
+            throw $errormsg
+        }
+    }
+    # To enable Archive(either TierRecommended or TierAfter), Monthly or Yearly retention needs to be set
+    if($tieringdetails.TieringMode -ne "" -and $tieringdetails.TieringMode -ne "DoNotTier" -and $manifest.allowedSubProtectionPolicyTypes.Count -lt 2)
+    {
+        if ( (($policy.RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq $null) -or ($policy.RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq 0)) -and (($policy.RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq $null) -or ($policy.RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq 0)) )
+        {
+             $errormsg="Monthly or Yearly retention needs to be set to enable Archive smart tiering. Please modify retention or disable smart tiering. Please note that disabling smart tiering may involve additional costs."
+             throw $errormsg                
+        }
+     
+        # For TierRecommended policy:  At least one of monthly or yearly retention should be >= 9 months.
+        if ($tieringdetails.TieringMode -eq "TierRecommend")
+        {        
+            if ( ( (($policy.RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq $null) -or ($policy.RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq 0)) -or ($policy.RetentionPolicy.MonthlySchedule.RetentionDuration.Count -lt 9)) -and ( (($policy.RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq $null) -or ($policy.RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq 0)) -or ($policy.RetentionPolicy.YearlySchedule.RetentionDuration.Count * 12) -lt 9) )
+            {
+                $errormsg="At least one of monthly or yearly retention should be >= 9 months for enabling TierRecommended mode for smart tiering. Please modify retention or disable smart tiering. Please note that disabling smart tiering may involve additional costs."
+                throw $errormsg
+            }
+        }
+        #For TierAfter policy:   TierAfter duration needs to be >= 3 months,  At least one of monthly or yearly retention should be >= (TierAfter + 6) months.
+        # e.g. if TierAfter is specified as 6 months, at least one of monthly or yearly retention should be at least 12 months.
+        if($tieringdetails.TieringMode -eq "TierAfter")
+        {   
+            if($tieringdetails.duration -lt 3  -or (( (($policy.RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq $null) -or ($policy.RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq 0)) -or $policy.RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -lt $tieringdetails.duration + 6) -and ( (($policy.RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq $null) -or ($policy.RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq 0)) -or ($policy.RetentionPolicy.YearlySchedule.RetentionDuration.Count * 12) -lt $tieringdetails.duration + 6)))
+            {
+                $errormsg="TierAfterDuration needs to be >= 3 months, at least one of monthly or yearly retention should be >= (TierAfterDuration + 6) months for smart tiering. Please modify retention or disable smart tiering. Please note that disabling smart tiering may involve additional costs."
+                throw $errormsg
+            }
+        }
+    }
+            
+    if($tieringdetails.TieringMode -ne "" -and $tieringdetails.TieringMode -ne "DoNotTier" -and $manifest.allowedSubProtectionPolicyTypes.Count -gt 2)
+    {
+        # To enable Archive, Full Backup Policy needs to be set.
+        if ($policy.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunFrequency -eq "" -and $MoveToArchiveTier -eq $true)
+        {
+            $errormsg="FullBackupRetentionPolicy can't be null while enabling Archive smart tiering for BackupManagementType AzureWorkload"
+            throw $errormsg
+        }
+        
+        # For TierAfter policy: TierAfter duration needs to be >= 45 days, at least one retention policy for full backup (daily / weekly / monthly / yearly) should be >= (TierAfter + 180) days.
+        #  e.g. if TierAfter is specified as 100 days, at least one retention policy for Full Backup needs to be greater than or equal to 280 days.
+        $daily=$true
+        if(($policy.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count -eq $null) -or ($policy.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count -eq 0))
+        {
+            $daily=$false
+        }
+        $weekly=$true
+        if(($policy.SubProtectionPolicy[$Index].RetentionPolicy.WeeklySchedule.RetentionDuration.Count -eq $null) -or ($policy.SubProtectionPolicy[$Index].RetentionPolicy.WeeklySchedule.RetentionDuration.Count -eq 0))
+        {
+            $weekly=$false
+        }
+        $monthly=$true
+        if(($policy.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq $null) -or ($policy.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -eq 0))
+        {
+            $monthly=$false
+        }
+        $yearly=$true
+        if(($policy.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq $null) -or ($policy.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.Count -eq 0))
+        {
+            $yearly=$false
+        }
+        if ($tieringdetails.TieringMode -eq "TierAfter")
+        {
+            if(
+                $tieringdetails.duration -lt 45 -or
+                (
+                ($daily -eq $false -or ($policy.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count) -lt ($tieringdetails.duration + 180)) -and (($weekly -eq $false) -or (($policy.SubProtectionPolicy[$Index].RetentionPolicy.WeeklySchedule.RetentionDuration[0].Count * 7) -lt ($tieringdetails.duration + 180))) -and (($monthly -eq $false) -or (($policy.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count * 30) -lt ($tieringdetails.duration + 180))) -and (($yearly -eq $false -or ($policy.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.Count * 365) -lt ($tieringdetails.duration + 180)))
+                ))
+            {
+                $errormsg= "TierAfterDuration needs to be >= 45 Days, at least one retention policy for full backup (daily / weekly / monthly / yearly) should be >= (TierAfter + 180) days for smart tiering. Please modify retention or disable smart tiering. Please note that disabling smart tiering may involve additional costs."
+                throw $errormsg
+            }
+        }
+    }
+    
+}
+  
+    

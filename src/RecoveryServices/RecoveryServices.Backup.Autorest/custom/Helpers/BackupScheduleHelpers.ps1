@@ -106,7 +106,7 @@ function ValidateBackupScheduleOptions {
 		
 		if(-not $BackupFrequency.Value) {
 			Write-Debug "BackupFrequency is empty"
-			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 1) {
+			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 2) {
 				# SAPHANA case				
 				if(-not $FullBackupPolicy.SchedulePolicy.ScheduleRunFrequency) {
 					$errormsg = "BackupFrequency cannot be empty for FullBackup"
@@ -140,7 +140,7 @@ function ValidateBackupScheduleOptions {
 				
 		# Validate ScheduleTime		
 		if(-not $ScheduleTime.Value) {
-			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 1) {
+			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 2) {
 				# SAPHANA case
 				Write-Debug "SAPHANA case"
 				if($FullBackupPolicy.SchedulePolicy.ScheduleRunTime.Count -lt 1) {
@@ -168,7 +168,7 @@ function ValidateBackupScheduleOptions {
 		# Validate ScheduleRunDay
 		
 		if( (-not $ScheduleRunDay.Value) -and ($BackupFrequency.Value -eq "Weekly") ) {
-			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 1) {
+			if ($manifest.allowedSubProtectionPolicyTypes.Count -gt 2) {
 				# SAPHANA case
 				if(-not $FullBackupPolicy.SchedulePolicy.ScheduleRunDays) {
 					$errormsg = "ScheduleRunDay cannot be empty for FullBackup"

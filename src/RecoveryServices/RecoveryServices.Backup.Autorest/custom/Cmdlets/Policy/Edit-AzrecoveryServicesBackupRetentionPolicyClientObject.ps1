@@ -47,12 +47,12 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
         ${EnableYearlyRetention},
 
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the daily schedule duration in days.')]
-        [ValidateScript({$_ -ge 7 -and $_ -le 9999}, ErrorMessage = "The value of DailyRetentionDurationInDays must be between 7 and 9999.")]
+        [ValidateRange(7, 9999)]
         [Nullable[int]]
         ${DailyRetentionDurationInDays},
 
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the weekly schedule duration in weeks.')]
-        [ValidateScript({$_ -ge 1 -and $_ -le 5163}, ErrorMessage = "The value of WeeklyRetentionDurationInWeeks must be between 1 and 5163.")]
+        [ValidateRange(1, 5163)]
         [Nullable[int]]
         ${WeeklyRetentionDurationInWeeks},
     
@@ -71,12 +71,12 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
         ${YearlyRetentionScheduleType},
 
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the monthly schedule duration in months.')]
-        [ValidateScript({$_ -ge 1 -and $_ -le 1188}, ErrorMessage = "The value of MonthlyRetentionDurationInMonths must be between 1 and 1188.")]
+        [ValidateRange(1, 1188)]
         [Nullable[int]]
         ${MonthlyRetentionDurationInMonths},   
 
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the days of the month for the monthly schedule.')]
-        [ValidateScript({$_ -ge 1 -and $_ -le 28}, ErrorMessage = "The value of MonthlyRetentionDaysOfTheMonth must be between 1 and 28.")]
+        [ValidateRange(1, 28)]
         [int[]]
         ${MonthlyRetentionDaysOfTheMonth},             
 
@@ -93,7 +93,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
         ${MonthlyRetentionWeeksOfTheMonth},        
 
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the yearly schedule duration in years.')]
-        [ValidateScript({$_ -ge 1 -and $_ -le 99}, ErrorMessage = "The value of YearlyRetentionDurationInYears must be between 1 and 99.")]
+        [ValidateRange(1, 99)]
         [Nullable[int]]
         ${YearlyRetentionDurationInYears},          
 
@@ -106,7 +106,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
         ${YearlyRetentionDaysOfTheWeek},       
 
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the days of the month for the monthly schedule.')]
-        [ValidateScript({$_ -ge 1 -and $_ -le 28}, ErrorMessage = "The value of YearlyRetentionDaysOfTheMonth must be between 1 and 28.")]
+        [ValidateRange(1, 28)]
         [int[]]
         ${YearlyRetentionDaysOfTheMonth},       
 
@@ -119,17 +119,17 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
         ${YearlyRetentionWeeksOfTheMonth},       
        
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the retention period for Differential Backup')]   
-        [ValidateScript({$_ -ge 7 -and $_ -le 180}, ErrorMessage = "The value of DifferentialRetentionPeriodInDays must be between 7 and 180.")]
+        [ValidateRange(7, 180)]
         [Nullable[int]]
         ${DifferentialRetentionPeriodInDays},           
 
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the retention period for Incremental Backup')]   
-        [ValidateScript({$_ -ge 7 -and $_ -le 180}, ErrorMessage = "The value of IncrementalRetentionPeriodInDays must be between 7 and 180.")]
+        [ValidateRange(7, 180)]
         [Nullable[int]]
         ${IncrementalRetentionPeriodInDays},   
 
         [Parameter(ParameterSetName="ModifyRetentionPolicy", HelpMessage='Specifies the retention period for Log Backup')]
-        [ValidateScript({$_ -ge 7 -and $_ -le 35}, ErrorMessage = "The value of LogRetentionPeriodInDays must be between 7 and 35.")]
+        [ValidateRange(7, 35)]
         [Nullable[int]]
         ${LogRetentionPeriodInDays}
     )
@@ -199,10 +199,14 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                      $policyObject.RetentionPolicy.DailySchedule = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.DailyRetentionSchedule]::new()
                      $policyObject.RetentionPolicy.DailySchedule.retentionDuration = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.RetentionDuration]::new()
                      $policyObject.RetentionPolicy.DailySchedule.RetentionDuration.Count = $DailyRetentionDurationInDays
-                     $policyObject.RetentionPolicy.dailySchedule.retentionDuration.durationType = "Days"
-                     $policyObject.RetentionPolicy.DailySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime    
+                     $policyObject.RetentionPolicy.dailySchedule.retentionDuration.durationType = "Days"   
                   }
               }    
+              if(($policyObject.RetentionPolicy.DailySchedule.RetentionDuration.Count -ne $null) -and ($policyObject.RetentionPolicy.DailySchedule.RetentionDuration.Count -ne 0)) 
+              {
+                  $policyObject.RetentionPolicy.DailySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime    
+              }
+
 
               if($EnableWeeklyRetention -eq $false)
               {
@@ -243,8 +247,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                       $policyObject.RetentionPolicy.WeeklySchedule = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.WeeklyRetentionSchedule]::new()
                       $policyObject.RetentionPolicy.WeeklySchedule.RetentionDuration = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.RetentionDuration]::new()
                       $policyObject.RetentionPolicy.WeeklySchedule.RetentionDuration[0].Count = $WeeklyRetentionDurationInWeeks
-                      $policyObject.RetentionPolicy.WeeklySchedule.RetentionDuration[0].DurationType = "Weeks"
-                      $policyObject.RetentionPolicy.WeeklySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
+                      $policyObject.RetentionPolicy.WeeklySchedule.RetentionDuration[0].DurationType = "Weeks"                     
                       if($policyObject.SchedulePolicy.ScheduleRunFrequency -eq "Daily")
                       {
                           $policyObject.RetentionPolicy.WeeklySchedule.DaysOfTheWeek =$WeeklyRetentionDaysOfTheWeek
@@ -255,6 +258,11 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                       }
                   }
               }
+              if (($policyObject.RetentionPolicy.WeeklySchedule.RetentionDuration.Count -ne $null) -and ($policyObject.RetentionPolicy.WeeklySchedule.RetentionDuration.Count -ne 0)) 
+              {
+                  $policyObject.RetentionPolicy.WeeklySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
+              }
+
 
               if($EnableMonthlyRetention -eq $false )
               {
@@ -335,7 +343,6 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionDuration.Count = $MonthlyRetentionDurationInMonths
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionDuration.DurationType = "Months"
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionScheduleFormatType=$MonthlyRetentionScheduleType
-                       $policyObject.RetentionPolicy.MonthlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionScheduleDaily = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.DailyRetentionFormat]::new()
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionScheduleDaily.DaysOfTheMonth += foreach ($day in $MonthlyRetentionDaysOfTheMonth) {
                             $existingDay = $policyObject.RetentionPolicy.MonthlySchedule.RetentionScheduleDaily.DaysOfTheMonth | Where-Object { $_.Date -eq $day }
@@ -359,7 +366,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionDuration = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.RetentionDuration]::new()
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionDuration.Count = $MonthlyRetentionDurationInMonths
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionDuration.DurationType = "Months"
-                       $policyObject.RetentionPolicy.MonthlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
+                       #$policyObject.RetentionPolicy.MonthlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionScheduleWeekly = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.WeeklyRetentionFormat]::new()
                        $validDaysOfWeek = $policyObject.SchedulePolicy.ScheduleRunDay
                        $selectedDays = $MonthlyRetentionDaysOfTheWeek | Where-Object { $validDaysOfWeek -contains $_ }
@@ -374,6 +381,11 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                        $policyObject.RetentionPolicy.MonthlySchedule.RetentionScheduleWeekly[0].WeeksOfTheMonth = $MonthlyRetentionWeeksOfTheMonth
                    }
               }
+              if (($policyObject.RetentionPolicy.MonthlySchedule.RetentionDuration.Count -ne $null) -and ($policyObject.RetentionPolicy.MonthlySchedule.RetentionDuration.Count -ne 0)) 
+              {
+                  $policyObject.RetentionPolicy.MonthlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
+              }
+
 
               if($EnableYearlyRetention -eq $false) 
               {
@@ -450,7 +462,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                             {
                                 $policyObject.RetentionPolicy.YearlySchedule.RetentionScheduleWeekly.WeeksOfTheMonth =$YearlyRetentionWeeksOfTheMonth
                             }
-                        }
+                        }                       
                     }
                     else # yearly retention is null 
                     {
@@ -458,8 +470,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                         $policyObject.RetentionPolicy.YearlySchedule.RetentionDuration = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.RetentionDuration]::new()
                         $policyObject.RetentionPolicy.YearlySchedule.RetentionDuration.Count = $YearlyRetentionDurationInYears
                         $policyObject.RetentionPolicy.YearlySchedule.RetentionScheduleFormatType=$YearlyRetentionScheduleType
-                        $policyObject.RetentionPolicy.YearlySchedule.RetentionDuration.DurationType = "Years"     
-                        $policyObject.RetentionPolicy.YearlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
+                        $policyObject.RetentionPolicy.YearlySchedule.RetentionDuration.DurationType = "Years"                             
               
                         $policyObject.RetentionPolicy.YearlySchedule.MonthsOfYear+=foreach ($monthOfYear in $YearlyRetentionMonthsOfTheYear){[Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Support.MonthOfYear]::new()|
                                   Add-Member -MemberType NoteProperty -Name "MonthOfYear" -Value $monthOfYear -PassThru}
@@ -514,34 +525,18 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                         }
                     }
               }
+              if (($policyObject.RetentionPolicy.YearlySchedule.RetentionDuration.Count -ne $null) -and ($policyObject.RetentionPolicy.YearlySchedule.RetentionDuration.Count -ne 0)) 
+              {
+                  $policyObject.RetentionPolicy.YearlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
+              }
+
           }
           
           if($ModifyDifferentialBackup)
           {
                $FullBackupPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
                $Index1 = $policyObject.SubProtectionPolicy.IndexOf($FullBackupPolicy)
-
-               ## Mandatory Full backup conditions for testing
-               #$policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunFrequency="Weekly"
-               #$policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunDay=@("Monday","Tuesday")
-               #$policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.scheduleRunTime=@("2020-09-30T19:30:00Z")
-               #$policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.MonthlySchedule.RetentionScheduleWeekly.DaysOfTheWeek=@("Monday","Tuesday")
-               #$policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.YearlySchedule.RetentionScheduleWeekly.DaysOfTheWeek=@("Monday","Tuesday")
-               #$policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.WeeklySchedule.DaysOfTheWeek=@("Monday","Tuesday")
-               ## Schedule Policy values for testing
-               #$policyObject.SubProtectionPolicy += [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.SubProtectionPolicy]::new()
-               #$DifferentialPolicy = $policyObject.SubProtectionPolicy[$policyObject.SubProtectionPolicy.Length - 1]
-               #$Index = $policyObject.SubProtectionPolicy.IndexOf($DifferentialPolicy)
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.SimpleSchedulePolicy]::new()
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunFrequency="Weekly"
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunDay=@("Sunday")
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.scheduleRunTime=@("2020-09-30T18:30:00Z")
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.Type = "SimpleSchedulePolicy"
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleWeeklyFrequency = 0
-               #$policyObject.SubProtectionPolicy[$Index].PolicyType = "Differential"
-
-
-
+              
                if($ModifyIncrementalBackup)        
                {
                    $errormsg= "Incremental backup is not allowed when Differential backup is enabled"
@@ -555,7 +550,6 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                else
                {
                    $policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.DailySchedule=$null
-                   $policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunFrequency="Weekly"
                    $DifferentialPolicy = $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Differential" }
                    if (-not $DifferentialPolicy )
                    {
@@ -586,24 +580,6 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
           {
                $FullBackupPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Full" }
                $Index1 = $policyObject.SubProtectionPolicy.IndexOf($FullBackupPolicy)
-               # Mandatory Full backup conditions for testing
-               #$policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunFrequency="Weekly"
-               #$policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunDay=@("Monday","Tuesday")
-               #$policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.scheduleRunTime=@("2020-09-30T19:30:00Z")
-               #$policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.MonthlySchedule.RetentionScheduleWeekly.DaysOfTheWeek=@("Monday","Tuesday")
-               #$policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.YearlySchedule.RetentionScheduleWeekly.DaysOfTheWeek=@("Monday","Tuesday")
-               #$policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.WeeklySchedule.DaysOfTheWeek=@("Monday","Tuesday")
-               ## Schedule Policy values for testing
-               #$policyObject.SubProtectionPolicy += [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.SubProtectionPolicy]::new()
-               #$DifferentialPolicy = $policyObject.SubProtectionPolicy[$policyObject.SubProtectionPolicy.Length - 1]
-               #$Index = $policyObject.SubProtectionPolicy.IndexOf($DifferentialPolicy)
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.SimpleSchedulePolicy]::new()
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunFrequency="Weekly"
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunDay=@("Sunday")
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.scheduleRunTime=@("2020-09-30T18:30:00Z")
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.Type = "SimpleSchedulePolicy"
-               #$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleWeeklyFrequency = 0
-               #$policyObject.SubProtectionPolicy[$Index].PolicyType = "Incremental"
 
                if($ModifyDifferentialBackup)
                {
@@ -618,7 +594,6 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                else
                {
                    $policyObject.SubProtectionPolicy[$Index1].RetentionPolicy.DailySchedule=$null
-                   $policyObject.SubProtectionPolicy[$Index1].SchedulePolicy.ScheduleRunFrequency="Weekly"
                    $IncrementalPolicy =  $policyObject.SubProtectionPolicy | Where-Object { $_.PolicyType -match "Incremental" }
                    if (-not $IncrementalPolicy)
                    {
@@ -695,7 +670,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                       if ( $DailyRetentionDurationInDays -ne $null ) 
                       {
                          $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count = $DailyRetentionDurationInDays 
-                      }
+                      }                      
                   }
                   else
                   {
@@ -703,10 +678,14 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                      $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.DailyRetentionSchedule]::new()
                      $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.retentionDuration = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.RetentionDuration]::new()
                      $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count = $DailyRetentionDurationInDays
-                     $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.dailySchedule.retentionDuration.durationType = "Days"
-                     $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionTime=$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunTime    
-                  }
+                     $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.dailySchedule.retentionDuration.durationType = "Days"                  }
               }
+              if (($policyObject.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count -ne $null) -and ($policyObject.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionDuration.Count -ne 0)) 
+              {
+                  $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.DailySchedule.RetentionTime=$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunTime    
+              }
+
+
               
               if($EnableWeeklyRetention -eq $false)
               {
@@ -760,6 +739,11 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                       }
                   }
               }
+              if (($policyObject.SubProtectionPolicy[$Index].RetentionPolicy.WeeklySchedule.RetentionDuration.Count -ne $null) -and ($policyObject.SubProtectionPolicy[$Index].RetentionPolicy.WeeklySchedule.RetentionDuration.Count -ne 0))
+              {
+                  $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.WeeklySchedule.RetentionTime=$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunTime
+              }
+
           
               if($EnableMonthlyRetention -eq $false )
               {
@@ -841,7 +825,7 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration.Count = $MonthlyRetentionDurationInMonths
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration.DurationType = "Months"
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionScheduleFormatType=$MonthlyRetentionScheduleType
-                       $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
+                       $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionTime=$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunTime
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionScheduleDaily = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.DailyRetentionFormat]::new()
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionScheduleDaily.DaysOfTheMonth += foreach ($day in $MonthlyRetentionDaysOfTheMonth) {
                             $existingDay = $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionScheduleDaily.DaysOfTheMonth | Where-Object { $_.Date -eq $day }
@@ -865,7 +849,6 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.RetentionDuration]::new()
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration.Count = $MonthlyRetentionDurationInMonths
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration.DurationType = "Months"
-                       $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionScheduleWeekly = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.WeeklyRetentionFormat]::new()
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionScheduleWeekly[0].WeeksOfTheMonth = $MonthlyRetentionWeeksOfTheMonth
                        $validDaysOfWeek = $policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunDay
@@ -881,6 +864,11 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionScheduleWeekly[0].WeeksOfTheMonth = $MonthlyRetentionWeeksOfTheMonth
                    }
               }
+              if (($policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -ne $null) -and ($policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionDuration[0].Count -ne 0)) 
+              {
+                  $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.MonthlySchedule.RetentionTime=$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunTime
+              }
+
           
               if($EnableYearlyRetention -eq $false) 
               {
@@ -966,7 +954,6 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                         $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.Count = $YearlyRetentionDurationInYears
                         $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionScheduleFormatType=$YearlyRetentionScheduleType
                         $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.DurationType = "Years"     
-                        $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionTime=$policyObject.SchedulePolicy.ScheduleRunTime
           
                         $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.MonthsOfYear=foreach ($monthOfYear in $YearlyRetentionMonthsOfTheYear){[Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Support.MonthOfYear]::new()|
                                   Add-Member -MemberType NoteProperty -Name "MonthOfYear" -Value $monthOfYear -PassThru}
@@ -1021,6 +1008,11 @@ function Edit-AzrecoveryServicesBackupRetentionPolicyClientObject {
                         }
                     }
               }
+              if (( $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.Count -ne $null) -and ($policyObject.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionDuration.Count -ne 0)) 
+              {
+                  $policyObject.SubProtectionPolicy[$Index].RetentionPolicy.YearlySchedule.RetentionTime=$policyObject.SubProtectionPolicy[$Index].SchedulePolicy.ScheduleRunTime
+              }
+
           }      
       ValidateMandatoryFields -Policy $policyObject -DatasourceType $DatasourceType -EnableDailyRetention $EnableDailyRetention -EnableWeeklyRetention $EnableWeeklyRetention -EnableMonthlyRetention $EnableMonthlyRetention -EnableYearlyRetention $EnableYearlyRetention -DailyRetentionDurationInDays $DailyRetentionDurationInDays -WeeklyRetentionDurationInWeeks $WeeklyRetentionDurationInWeeks -WeeklyRetentionDaysOfTheWeek $WeeklyRetentionDaysOfTheWeek -MonthlyRetentionDurationInMonths $MonthlyRetentionDurationInMonths -MonthlyRetentionDaysOfTheMonth $MonthlyRetentionDaysOfTheMonth -MonthlyRetentionDaysOfTheWeek $MonthlyRetentionDaysOfTheWeek -MonthlyRetentionWeeksOfTheMonth $MonthlyRetentionWeeksOfTheMonth -YearlyRetentionDurationInYears $YearlyRetentionDurationInYears -YearlyRetentionMonthsOfTheYear $YearlyRetentionMonthsOfTheYear -YearlyRetentionDaysOfTheWeek $YearlyRetentionDaysOfTheWeek -YearlyRetentionDaysOfTheMonth $YearlyRetentionDaysOfTheMonth -YearlyRetentionWeeksOfTheMonth $YearlyRetentionWeeksOfTheMonth 
 

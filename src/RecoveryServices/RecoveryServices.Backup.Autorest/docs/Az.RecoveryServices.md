@@ -1,7 +1,7 @@
 ---
 Module Name: Az.RecoveryServices
 Module Guid: 37eaf44e-78f7-4a5a-82d1-f6350681704b
-Download Help Link: https://learn.microsoft.com/powershell/module/az.recoveryservices
+Download Help Link: https://docs.microsoft.com/powershell/module/az.recoveryservices
 Help Version: 1.0.0.0
 Locale: en-US
 ---

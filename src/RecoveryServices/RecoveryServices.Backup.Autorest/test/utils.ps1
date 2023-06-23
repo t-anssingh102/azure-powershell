@@ -29,14 +29,14 @@ function setupEnv() {
 
     $env.add("TestBackupSchedulePolicy", $TestBackupSchedulePolicyVariables) | Out-Null                                                                
 
-    $BackupPolicyTestVariables = @{                                                                                                     
+    $BackupRetentionPolicyTestVariables = @{                                                                                                     
         SubscriptionId = "38304e13-357e-405e-9e9a-220351dcce8c"
         ResourceGroupName = "arohijain-rg"
         VaultName = "arohijain-vault"
-        NewPolicyName = "arohijain-policy-3"                                                                              # confirm what to keep
+        NewPolicyName = "arohijain-p-1"                                                                              # confirm what to keep
     }
 
-    $env.add("TestBackupPolicy", $BackupPolicyTestVariables) | Out-Null                                                                
+    $env.add("TestBackupPolicy", $BackupRetentionPolicyTestVariables) | Out-Null                                                                
     
     $envFile = 'env.json'
     if ($TestMode -eq 'live') {

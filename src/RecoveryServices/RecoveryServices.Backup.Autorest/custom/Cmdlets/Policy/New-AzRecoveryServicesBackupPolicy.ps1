@@ -26,7 +26,7 @@
         ${Policy},
 
         [Parameter(Mandatory=$false)]
-        [ValidateScript({$_ -ge 1 -and $_ -le 5}, ErrorMessage = "The value of SnapshotRetentionDurationInDays must be between 1 and 5.")]
+        [ValidateRange(1, 5)]
         [Nullable[int]]
         ${SnapshotRetentionDurationInDays},
 
@@ -84,7 +84,7 @@
         ${TierAfterDuration},
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet("Days", "Months", "Invalid", ErrorMessage = "Invalid value for DurationType. Please provide a valid value. Valid values are Days/Months")]
+        [ValidateSet("Days", "Months", ErrorMessage = "Invalid value for DurationType. Please provide a valid value. Valid values are Days/Months")]
         [string]
         ${TierAfterDurationType}
         
@@ -127,7 +127,7 @@
             }
             if($MoveToArchiveTier -eq $false)   #if tiering disabled
             {
-                if(($TieringMode -ne "") -or ($TierAfterDuration -ne $null) -or ($TierAfterDurationType -ne "") )
+                if(($TieringMode -ne "") -or ($TierAfterDuration -ne $null) -or ($TierAfterDurationType -ne ""))
                 {
                     $errormsg= "Invalid parameters for disable tiering"
                     throw $errormsg

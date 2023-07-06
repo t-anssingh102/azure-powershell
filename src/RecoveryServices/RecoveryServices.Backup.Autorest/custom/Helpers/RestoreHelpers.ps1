@@ -1,7 +1,7 @@
 ﻿function Get-SourceResourceId {
     [OutputType('string')]
     [CmdletBinding(PositionalBinding=$false)]
-    [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Description('Gets the SourceResourceId from the Recovery Point.')]
+    [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.DoNotExportAttribute()]
 
     param (
         [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the recovery point.')]

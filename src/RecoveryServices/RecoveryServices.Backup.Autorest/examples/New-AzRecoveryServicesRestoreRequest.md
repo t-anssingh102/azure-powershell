@@ -1,18 +1,18 @@
-### Example 1: {{ Add title here }}
+### Example 1: Trigger a restore after initializing a restore request
 ```powershell
-PS C:\> {{ Add code here }}
+$req = Initialize-AzRecoveryServicesRestoreRequest -DatasourceType AzureVM -RecoveryType "AlternateLocation" -RecoveryPoint $rp -TargetSubscriptionId $subId -TargetResourceGroupName $resourceGroupName -TargetVMName "hiagaRestore22" -StorageAccountId "/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/hiagarg/providers/Microsoft.Storage/storageAccounts/hiagasa" -TargetVNetResourceGroup $resourceGroupName -TargetVNetName "hiagarg-vnet" -TargetSubnetName "default" -Region "centraluseuap"
 
-{{ Add output here }}
+$string = $rp.Id
+$pattern = '/recoveryPoints/(?<recoveryPointId>[^/]+)$'
+$matches = [regex]::Match($string, $pattern)
+$rpId = $matches.Groups["recoveryPointId"].Value
+
+New-AzRecoveryServicesRestoreRequest -ContainerName $containerName -ProtectedItemName $itemName -RecoveryPointId $rpId -ResourceGroupName $resourceGroupName -VaultName $vaultName -Request $req
 ```
 
-{{ Add description here }}
+```output
 
-### Example 2: {{ Add title here }}
-```powershell
-PS C:\> {{ Add code here }}
-
-{{ Add output here }}
 ```
 
-{{ Add description here }}
+This triggers a restore based on the initialized restore request. The restore job can be seen on the portal or can be tracked using its operation id. 
 

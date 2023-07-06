@@ -2,7 +2,7 @@
 {
     [OutputType('Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IRestoreRequest')]
     [CmdletBinding(PositionalBinding=$false, SupportsShouldProcess)]
-    [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Description('Sends a new restore request taking a request object as input.')]
+    [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Description('Triggers restore for the backup item to the specified recovery point.')]
 
 	param(
         [Parameter(Mandatory=$false, HelpMessage='Container name where restore is to be done.')]

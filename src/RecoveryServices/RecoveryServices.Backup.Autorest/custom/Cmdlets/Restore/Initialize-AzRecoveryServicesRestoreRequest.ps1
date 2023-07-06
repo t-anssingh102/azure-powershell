@@ -144,7 +144,9 @@
         # Call validation function here
     }
 
-    process { 
+    process {
+        
+        # Decide the type of Restore based on RecoveryPoint
         
         # SAPHANA cases
         if ($DataSourceType -eq "SAPHANA") {
@@ -171,7 +173,6 @@
 
                 $restoreRequest.ObjectType = "AzureWorkloadSAPHanaRestoreRequest"
                 $restoreRequest.RecoveryType = $RecoveryType
-
 		    }
             elseif (($RecoveryType -eq "AlternateLocation") -and ($RecoveryMode -eq "FileRecovery")) {
                 
@@ -188,7 +189,6 @@
 
                 $restoreRequest.RecoveryType = $RecoveryType
                 $restoreRequest.RecoveryMode = $RecoveryMode
-
             }
         }
 

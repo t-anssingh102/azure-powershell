@@ -359,22 +359,16 @@ Accept wildcard characters: False
 ### -Parameter
 Base class for backup items.
 To construct, see NOTES section for PARAMETER properties and create a hash table.
-### -PassThru
-Returns true when the command succeeds
 
 ```yaml
 Type: Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IProtectedItemResource
 Parameter Sets: Create, CreateViaIdentity
-Type: System.Management.Automation.SwitchParameter
-Parameter Sets: (All)
 Aliases:
 
 Required: True
-Required: False
 Position: Named
 Default value: None
 Accept pipeline input: True (ByValue)
-Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

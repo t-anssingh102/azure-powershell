@@ -175,9 +175,6 @@ Fetches the status of a triggered validate operation.
 The status can be in progress, completed\r\nor failed.
 You can refer to the OperationStatus enum for all the possible states of the operation.\r\nIf operation has completed, this method returns the list of errors obtained while validating the operation.
 
-### [Get-SourceResourceId](Get-SourceResourceId.md)
-Gets the SourceResourceId from the Recovery Point.
-
 ### [Initialize-AzRecoveryServicesRestoreRequest](Initialize-AzRecoveryServicesRestoreRequest.md)
 Initializes Restore Request object for triggering restore on a protected backup instance.
 
@@ -209,7 +206,7 @@ Create Intent for Enabling backup of an item.
 This is a synchronous operation.
 
 ### [New-AzRecoveryServicesRestoreRequest](New-AzRecoveryServicesRestoreRequest.md)
-Sends a new restore request taking a request object as input.
+Triggers restore for the backup item to the specified recovery point.
 
 ### [Register-AzRecoveryServicesProtectionContainer](Register-AzRecoveryServicesProtectionContainer.md)
 Registers the container with Recovery Services vault.\r\nThis is an asynchronous operation.

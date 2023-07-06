@@ -109,5 +109,8 @@ directive:
     transform: $ = $.replace('internal Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IExtendedProperties ExtendedProperty', 'public Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IExtendedProperties ExtendedProperty');
   - from: source-file-csharp
     where: $
-    transform: $ = $.replace('internal Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IWorkloadProtectableItem Property', 'public Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IWorkloadProtectableItem Property');
+    transform: $ = $.replace('internal Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IWorkloadProtectableItem Property', 'public Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IWorkloadProtectableItem Property');  
+  - from: source-file-csharp
+    where: $
+    transform: $ = $.replace('internal Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IRecoveryPoint Property', 'public Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IRecoveryPoint Property');
 ```

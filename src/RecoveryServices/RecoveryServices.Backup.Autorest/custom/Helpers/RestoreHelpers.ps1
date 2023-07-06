@@ -1,4 +1,36 @@
-﻿function ValidateRetentionConfig {
+﻿function Get-SourceResourceId {
+    [OutputType('string')]
+    [CmdletBinding(PositionalBinding=$false)]
+    [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Description('Gets the SourceResourceId from the Recovery Point.')]
+
+    param (
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the recovery point.')]
+        [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IRecoveryPointResource]
+        ${RecoveryPoint}
+    )
+
+    process {
+		$RecoveryPointId = $RecoveryPoint.Id
+        
+        $pattern = '/subscriptions/(?<subscriptionId>[^/]+)/resourceGroups/(?<resourceGroupName>[^/]+)/providers/Microsoft\.RecoveryServices/vaults/(?<vaultName>[^/]+)'
+        $matches = [regex]::Match($RecoveryPointId, $pattern)
+        $SourceSubscriptionId = $matches.Groups["subscriptionId"].Value
+        $SourceResourceGroupName = $matches.Groups["resourceGroupName"].Value
+        $SourceVaultName = $matches.Groups["vaultName"].Value
+        
+        $pattern = "/protectedItems/(?<ProtectedItemName>[^/]+)/recoveryPoints"
+        $matches = [regex]::Match($RecoveryPointId, $pattern)
+        $ProtectedItemName = $matches.Groups["ProtectedItemName"].Value
+
+        $ProtectedItems = Get-AzRecoveryServicesBackupProtectedItem -ResourceGroupName $SourceResourceGroupName -VaultName $SourceVaultName -SubscriptionId $SourceSubscriptionId
+        
+        $SelectedProtectedItem = $ProtectedItems | Where-Object {$_.Name -eq $ProtectedItemName}
+
+        $SelectedProtectedItem.SourceResourceId
+	}
+}
+
+function ValidateRetentionConfig {
 	[Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.DoNotExportAttribute()]
 	param (
         [Parameter(Mandatory)]

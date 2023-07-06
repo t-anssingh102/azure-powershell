@@ -1,37 +1,4 @@
-﻿function Get-SourceResourceId {
-    [OutputType('string')]
-    [CmdletBinding(PositionalBinding=$false)]
-    [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Description('Initializes Restore Request object for triggering restore on a protected backup instance.')]
-
-    param (
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the ContainerId')]
-        [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IRecoveryPointResource]
-        ${RecoveryPoint}
-    )
-
-    process {
-		$RecoveryPointId = $RecoveryPoint.Id
-        
-        $pattern = '/subscriptions/(?<subscriptionId>[^/]+)/resourceGroups/(?<resourceGroupName>[^/]+)/providers/Microsoft\.RecoveryServices/vaults/(?<vaultName>[^/]+)'
-        $matches = [regex]::Match($RecoveryPointId, $pattern)
-        $SourceSubscriptionId = $matches.Groups["subscriptionId"].Value
-        $SourceResourceGroupName = $matches.Groups["resourceGroupName"].Value
-        $SourceVaultName = $matches.Groups["vaultName"].Value
-        
-        $pattern = "/protectedItems/(?<ProtectedItemName>[^/]+)/recoveryPoints"
-        $matches = [regex]::Match($RecoveryPointId, $pattern)
-        $ProtectedItemName = $matches.Groups["ProtectedItemName"].Value
-
-        $ProtectedItems = Get-AzRecoveryServicesBackupProtectedItem -ResourceGroupName $SourceResourceGroupName -VaultName $SourceVaultName -SubscriptionId $SourceSubscriptionId
-        
-        $SelectedProtectedItem = $ProtectedItems | Where-Object {$_.Name -eq $ProtectedItemName}
-
-        $SelectedProtectedItem.SourceResourceId
-	}
-}
-
-
-function Initialize-AzRecoveryServicesRestoreRequest {
+﻿function Initialize-AzRecoveryServicesRestoreRequest {
 	[OutputType('Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.RestoreRequest')]
     [CmdletBinding(PositionalBinding=$false)]
     [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Description('Initializes Restore Request object for triggering restore on a protected backup instance.')]
@@ -39,146 +6,142 @@ function Initialize-AzRecoveryServicesRestoreRequest {
 	param (
         # Recovery point and type specific parameters
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the ContainerId')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the DatasourceType')]
         [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Support.DatasourceTypes]
         ${DatasourceType},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the ContainerId')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the recovery point.')]
         [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IRecoveryPointResource]
         ${RecoveryPoint},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the RecoveryType')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the RecoveryType.')]
         [string]
         ${RecoveryType},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the RecoveryMode')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the RecoveryMode.')]
         [string]
         ${RecoveryMode},
 
         # Target specific parameters
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the ContainerId')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target subscriptionId.')]
         [string]
         ${TargetSubscriptionId},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the ContainerId')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target resourceGroupName.')]
         [string]
         ${TargetResourceGroupName},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the ContainerId')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the name of target VM to which we restore.')]
         [string]
         ${TargetVMName},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the ContainerId')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the ContainerId in which target VM is created.')]
         [string]
         ${TargetContainerId},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory in which restore file is created.')]
         [string]
         ${TargetDirectory},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the DatabaseName')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target DB name which is created.')]
         [string]
         ${TargetDatabaseName},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the name of the target VNet.')]
         [string]
         ${TargetVNetName},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the resourceGroupName of the target VNet.')]
         [string]
         ${TargetVNetResourceGroup},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target subnet name.')]
         [string]
         ${TargetSubnetName},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target zone number.')]
         [int]
         ${TargetZoneNumber},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the OverwriteOption')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the OverwriteOption in case of conflicting names.')]
         #[Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Support.OverwriteOptions]
         [string]
         ${OverwriteOption},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the SourceResourceId')]
-        [string]
-        ${SourceResourceId},
-
         # AzureVM specific parameters
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target StorageAccountId.')]
         [string]
         ${StorageAccountId},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target region.')]
         [string]
         ${Region},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the DiskEncryptionSetId.')]
         [string]
         ${DiskEncryptionSetId},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the list of restore disks.')]
         [string[]]
         ${RestoreDiskList},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies whether we need to restore only the OS disk.')]
         [switch]
         ${RestoreOnlyOSDisk},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies whether we need to use the system assigned identity.')]
         [switch]
         ${UseSystemAssignedIdentity},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies user assigned identity.')]
         [string]
         ${UserAssignedIdentityId},
 
         # SQL specific parameters
         
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies whether we need to set NonRecoverable option.')]
         [bool]
         ${NonRecoverable},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the DataSourceLogicalName.')]
         [string]
         ${DataSourceLogicalName},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the DataSourcePath.')]
         [string]
         ${DataSourcePath},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the DataTargetPath.')]
         [string]
         ${DataTargetPath},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the LogSourceLogicalName.')]
         [string]
         ${LogSourceLogicalName},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the LogSourcePath.')]
         [string]
         ${LogSourcePath},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the LogTargetPath.')]
         [string]
         ${LogTargetPath},
 
         # Rehydrate specific parameters
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the rehydrate duration.')]
         [string]
         ${RehydrateDuration},
 
-        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the target directory')]
+        [Parameter(ParameterSetName='InitializeRestoreRequest', HelpMessage='Specifies the rehydrate priority.')]
         [string]
         ${RehydratePriority}
     )
 
     begin {  
-
+        # Call validation function here
     }
 
     process { 
@@ -304,19 +267,21 @@ function Initialize-AzRecoveryServicesRestoreRequest {
 
         # SQL cases
 
-        elseif ($ObjectType -eq "AzureWorkloadSQLRestoreRequest") {
+        elseif ($ObjectType -eq "MSSQL") {
 			$restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.AzureWorkloadSqlRestoreRequest]::new()
 			
             if (($RecoveryType -eq "AlternateLocation") -and (-not $RecoveryMode)) {
 				Write-Debug "SQL alternate"
             
-				$restoreRequest.ObjectType = $ObjectType
+				$restoreRequest.ObjectType = "AzureWorkloadSQLRestoreRequest"
 				$restoreRequest.RecoveryType = $RecoveryType
                 $restoreRequest.ShouldUseAlternateTargetLocation = $true
                 
                 $restoreRequest.TargetInfo.ContainerId = $TargetContainerId
                 $restoreRequest.TargetInfo.DatabaseName = $DatabaseName
                 $restoreRequest.TargetInfo.OverwriteOption = $OverwriteOption
+
+                $TargetVirtualMachineId = "/subscriptions/$TargetSubscriptionId/resourceGroups/$TargetResourceGroupName/providers/Microsoft.Compute/virtualMachines/$TargetVMName"
                 $restoreRequest.TargetVirtualMachineId = $TargetVirtualMachineId
 				
                 $restoreRequest.IsNonRecoverable = $NonRecoverable
@@ -341,7 +306,7 @@ function Initialize-AzRecoveryServicesRestoreRequest {
             elseif ($RecoveryType -eq "OriginalLocation") {
                 Write-Debug "SQL original"
 
-                $restoreRequest.ObjectType = $ObjectType
+                $restoreRequest.ObjectType = "AzureWorkloadSQLRestoreRequest"
                 $restoreRequest.RecoveryType = $RecoveryType
                 $restoreRequest.ShouldUseAlternateTargetLocation = $true
                 $restoreRequest.IsNonRecoverable = $NonRecoverable
@@ -349,24 +314,27 @@ function Initialize-AzRecoveryServicesRestoreRequest {
             elseif (($RecoveryType -eq "AlternateLocation") -and ($RecoveryMode -eq "FileRecovery")) {
 				Write-Debug "SQL restore as files"
 				
-                $restoreRequest.ObjectType = $ObjectType
+                $restoreRequest.ObjectType = "AzureWorkloadSQLRestoreRequest"
 				$restoreRequest.RecoveryType = $RecoveryType
                 $restoreRequest.RecoveryMode = $RecoveryMode
 
                 $restoreRequest.TargetInfo.ContainerId = $TargetContainerId
                 $restoreRequest.TargetInfo.TargetDirectoryForFileRestore = $TargetDirectory
+
+                $TargetVirtualMachineId = "/subscriptions/$TargetSubscriptionId/resourceGroups/$TargetResourceGroupName/providers/Microsoft.Compute/virtualMachines/$TargetVMName"
                 $restoreRequest.TargetVirtualMachineId = $TargetVirtualMachineId
-				$restoreRequest.SourceResourceId = $SourceResourceId
+				
+                $restoreRequest.SourceResourceId = $SourceResourceId
 			}
         }
 
         # PointInTime cases
 
         if ($ObjectType -eq "AzureWorkloadSAPHanaPointInTimeRestoreRequest") {
-			$restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20210210.AzureWorkloadSapHanaPointInTimeRestoreRequest]::new()
+			$restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.AzureWorkloadSapHanaPointInTimeRestoreRequest]::new()
 		}
         elseif ($ObjectType -eq "AzureWorkloadSQLPointInTimeRestoreRequest") {
-            $restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20210210.AzureWorkloadSqlPointInTimeRestoreRequest]::new()
+            $restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.AzureWorkloadSqlPointInTimeRestoreRequest]::new()
         }
 
         # Rehydrate cases
@@ -375,10 +343,10 @@ function Initialize-AzRecoveryServicesRestoreRequest {
             $restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.AzureWorkloadSapHanaRestoreWithRehydrateRequest]::new()
         }
         elseif ($ObjectType -eq "IaasVMRestoreWithRehydrationRequest") {
-            $restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20210210.IaasVMRestoreWithRehydrationRequest]::new()
+            $restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IaasVMRestoreWithRehydrationRequest]::new()
         }
         elseif ($ObjectType -eq "AzureWorkloadSQLRestoreWithRehydrateRequest") {
-			$restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20210210.AzureWorkloadSqlRestoreWithRehydrateRequest]::new()
+			$restoreRequest = [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.AzureWorkloadSqlRestoreWithRehydrateRequest]::new()
 		}
 
         $restoreRequest

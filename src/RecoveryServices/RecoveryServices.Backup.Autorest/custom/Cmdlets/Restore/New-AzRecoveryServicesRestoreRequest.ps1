@@ -2,10 +2,10 @@
 {
     [OutputType('Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IRestoreRequest')]
     [CmdletBinding(PositionalBinding=$false, SupportsShouldProcess)]
-    [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Description('Creates a new backup policy in a given recovery services vault')]
+    [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Description('Sends a new restore request taking a request object as input.')]
 
 	param(
-        [Parameter(Mandatory=$false, HelpMessage='Subscription Id')]
+        [Parameter(Mandatory=$false, HelpMessage='Container name where restore is to be done.')]
         [System.String]
         ${ContainerName},
 
@@ -17,15 +17,15 @@
         [System.String]
         ${VaultName},
 
-        [Parameter(Mandatory, HelpMessage='Policy Name for the policy to be created')]
+        [Parameter(Mandatory, HelpMessage='Name of the protected item which is to be restored.')]
         [System.String]
         ${ProtectedItemName},
 
-        [Parameter(Mandatory, HelpMessage='Policy Name for the policy to be created')]
+        [Parameter(Mandatory, HelpMessage='Recovery point Id for the restore.')]
         [System.String]
         ${RecoveryPointId},
 
-        [Parameter(Mandatory, HelpMessage='Workload specific Backup policy object.')]
+        [Parameter(Mandatory, HelpMessage='Restore request object to be sent to the service.')]
         [Microsoft.Azure.PowerShell.Cmdlets.RecoveryServices.Models.Api20230201.IRestoreRequest]
         ${Request},
     
